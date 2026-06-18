@@ -22,8 +22,10 @@ jobs:
         run: |
           slug=$(jq -r .slug plugin.json)
           version=$(jq -r .version plugin.json)
+          tech=$(jq -r .tech plugin.json)
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tech=$tech" >> "$GITHUB_OUTPUT"
 
       - name: Clone orchestrator
         run: |
@@ -39,6 +41,7 @@ jobs:
         run: |
           slug="${{ steps.meta.outputs.slug }}"
           version="${{ steps.meta.outputs.version }}"
+          tech="${{ steps.meta.outputs.tech }}"
           branch="release/${slug}-${version}-${{ github.run_number }}"
           git config user.name "toolbox-bot"
           git config user.email "toolbox-bot@users.noreply.github.com"
@@ -50,6 +53,6 @@ jobs:
             --repo "${OWNER}/${ORCHESTRATOR}" \
             --base main \
             --head "$branch" \
-            --title "Release: ${slug} ${version}" \
+            --title "Release: [${tech}] ${slug} ${version}" \
             --label "waiting-for-approval" \
             --body "App: ${{ github.repository }} | Version: ${version} | Commit: ${{ github.sha }} | Merge to approve. Close to reject."
