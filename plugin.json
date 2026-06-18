@@ -4,6 +4,5 @@
   "description": "Facade configuration tool.",
   "path": "/apps/faccon",
   "tech": "html",
-  "version": "1.0.0",
   "enabled": true
 }
