@@ -21,8 +21,8 @@ jobs:
         id: meta
         run: |
           slug=$(jq -r .slug plugin.json)
-          version=$(jq -r .version plugin.json)
           tech=$(jq -r .tech plugin.json)
+          version="${{ github.ref_name }}"
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tech=$tech" >> "$GITHUB_OUTPUT"
@@ -34,7 +34,8 @@ jobs:
 
       - name: Stage manifest
         run: |
-          cp plugin.json "orch/manifests/${{ steps.meta.outputs.slug }}.json"
+          jq --arg v "${{ github.ref_name }}" '. + {version: $v}' plugin.json \
+            > "orch/manifests/${{ steps.meta.outputs.slug }}.json"
 
       - name: Open release PR
         working-directory: orch
