@@ -51,8 +51,4 @@ jobs:
             --base main \
             --head "$branch" \
             --title "Release: ${slug} ${version}" \
-            --body "App: ${{ github.repository }}
-Version: ${version}
-Commit: ${{ github.sha }}
-
-Merge to approve. Close to reject."
+            --body "App: ${{ github.repository }} | Version: ${version} | Commit: ${{ github.sha }} | Merge to approve. Close to reject."
