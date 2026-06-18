@@ -51,4 +51,5 @@ jobs:
             --base main \
             --head "$branch" \
             --title "Release: ${slug} ${version}" \
+            --label "waiting-for-approval" \
             --body "App: ${{ github.repository }} | Version: ${version} | Commit: ${{ github.sha }} | Merge to approve. Close to reject."
