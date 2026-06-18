@@ -39,7 +39,7 @@ jobs:
         run: |
           slug="${{ steps.meta.outputs.slug }}"
           version="${{ steps.meta.outputs.version }}"
-          branch="release/${slug}-${version}"
+          branch="release/${slug}-${version}-${{ github.run_number }}"
           git config user.name "toolbox-bot"
           git config user.email "toolbox-bot@users.noreply.github.com"
           git checkout -b "$branch"
