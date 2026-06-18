@@ -1,0 +1,58 @@
+name: Notify orchestrator on release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.ORCHESTRATOR_TOKEN }}
+      OWNER: Toolbox-PR-Test
+      ORCHESTRATOR: ToolboxOrchestrator
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read manifest
+        id: meta
+        run: |
+          slug=$(jq -r .slug plugin.json)
+          version=$(jq -r .version plugin.json)
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Clone orchestrator
+        run: |
+          git clone --depth 1 \
+            "https://oauth2:${GH_TOKEN}@github.com/${OWNER}/${ORCHESTRATOR}.git" orch
+
+      - name: Stage manifest
+        run: |
+          cp plugin.json "orch/manifests/${{ steps.meta.outputs.slug }}.json"
+
+      - name: Open release PR
+        working-directory: orch
+        run: |
+          slug="${{ steps.meta.outputs.slug }}"
+          version="${{ steps.meta.outputs.version }}"
+          branch="release/${slug}-${version}"
+          git config user.name "toolbox-bot"
+          git config user.email "toolbox-bot@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add "manifests/${slug}.json"
+          git commit -m "release: ${slug} ${version}"
+          git push -u origin "$branch"
+          gh pr create \
+            --repo "${OWNER}/${ORCHESTRATOR}" \
+            --base main \
+            --head "$branch" \
+            --title "Release: ${slug} ${version}" \
+            --body "App: ${{ github.repository }}
+Version: ${version}
+Commit: ${{ github.sha }}
+
+Merge to approve. Close to reject."
